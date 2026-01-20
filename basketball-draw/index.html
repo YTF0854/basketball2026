@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信群篮球抽签系统</title>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #FF9800;
+            --success-color: #4CAF50;
+            --danger-color: #F44336;
+            --light-bg: #f5f5f5;
+            --border-color: #e0e0e0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        /* 标签页样式 */
+        .tab-nav {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            position: relative;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+        
+        .tab-indicator {
+            position: absolute;
+            bottom: -2px;
+            height: 3px;
+            background: var(--primary-color);
+            transition: all 0.3s;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: var(--light-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .info-card {
+            background: #E3F2FD;
+            border-left: 4px solid var(--primary-color);
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .error-card {
+            background: #FFEBEE;
+            border-left: 4px solid var(--danger-color);
+            display: none;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        select.form-control {
+            height: 44px;
+        }
+        
+        .form-hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 4px;
+            display: block;
+        }
+        
+        .form-error {
+            color: var(--danger-color);
+            font-size: 0.8rem;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: #1976D2;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+        
+        .btn-secondary:hover {
+            background: #F57C00;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background: #388E3C;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background: #D32F2F;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 消息提示 */
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .message.success {
+            background: #E8F5E9;
+            color: var(--success-color);
+            border: 1px solid #C8E6C9;
+        }
+        
+        .message.error {
+            background: #FFEBEE;
+            color: var(--danger-color);
+            border: 1px solid #FFCDD2;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* 抽签结果页面 */
+        .draw-page {
+            display: none;
+        }
+        
+        .draw-header {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .draw-code {
+            display: inline-block;
+            background: white;
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 8px 0;
+            font-size: 1.1rem;
+        }
+        
+        /* 参与者信息样式 */
+        .participant-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #E3F2FD;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1976D2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .participant-details {
+            flex: 1;
+        }
+        
+        .participant-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .participant-status {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        /* 队伍选择器 */
+        .team-selector {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .team-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .team-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+            outline: none;
+        }
+        
+        .selection-result {
+            background: #E8F5E9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* 分组显示 */
+        .groups-container {
+            margin: 20px 0;
+        }
+        
+        .group-card {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .group-card:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .group-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .group-body {
+            padding: 15px;
+            background: white;
+        }
+        
+        .team-list {
+            list-style: none;
+        }
+        
+        .team-item {
+            padding: 10px;
+            margin-bottom: 6px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .team-item:hover {
+            background: #f9f9f9;
+        }
+        
+        /* 进度条 */
+        .progress-container {
+            margin: 15px 0;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), #8BC34A);
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        /* 分享样式 */
+        .share-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+        
+        .share-link {
+            background: white;
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            word-break: break-all;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        .share-link a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .share-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .share-btn.copy {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .share-btn.copy:hover {
+            background: #1976D2;
+        }
+        
+        .share-btn.back {
+            background: #666;
+            color: white;
+        }
+        
+        .share-btn.back:hover {
+            background: #555;
+        }
+        
+        /* 自定义配置区域 */
+        .custom-config-section {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .config-example {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px dashed #ccc;
+        }
+        
+        /* 徽章 */
+        .badge {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .badge-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .badge-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .badge-warning {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        /* 分配规则说明 */
+        .rules-info {
+            background: #E8F5E9;
+            border: 1px solid #C8E6C9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+        
+        .rules-info h4 {
+            color: var(--success-color);
+            margin-bottom: 8px;
+        }
+        
+        /* 响应式设计 */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 800px;
+                margin: 20px auto;
+                min-height: auto;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+            
+            .header {
+                border-radius: 15px 15px 0 0;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .message {
+                left: 50%;
+                transform: translateX(-50%);
+                max-width: 400px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .share-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 消息提示容器 -->
+    <div id="messageContainer"></div>
+    
+    <div class="container">
+        <!-- 主页面 -->
+        <div id="mainPage">
+            <div class="header">
+                <h1>🏀 微信群篮球抽签系统</h1>
+                <div class="subtitle">创建者设定种子队 | 参与者选择队伍 | 实时分组</div>
+            </div>
+            
+            <div class="content">
+                <!-- 导航标签 -->
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="create">创建抽签</button>
+                    <button class="tab-btn" data-tab="join">参与抽签</button>
+                    <button class="tab-btn" data-tab="manage">管理抽签</button>
+                    <div class="tab-indicator" id="tabIndicator"></div>
+                </div>
+                
+                <!-- 创建抽签页面 -->
+                <div class="tab-pane active" id="createTab">
+                    <div class="info-card">
+                        💡 <strong>使用说明：</strong><br>
+                        1. 设定分组和种子队<br>
+                        2. 分享链接到微信群<br>
+                        3. 参与者选择队伍名称<br>
+                        4. 系统自动分组，实时显示结果
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="drawName">抽签名称 *</label>
+                        <input type="text" id="drawName" class="form-control" placeholder="例如：2024春季篮球联赛">
+                        <span class="form-hint">为抽签活动命名</span>
+                        <span class="form-error" id="drawNameError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="creatorName">创建者昵称 *</label>
+                        <input type="text" id="creatorName" class="form-control" placeholder="您的昵称">
+                        <span class="form-hint">您的昵称将显示为创建者</span>
+                        <span class="form-error" id="creatorNameError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="teamList">所有队伍名称 *</label>
+                        <textarea id="teamList" class="form-control" placeholder="每行输入一个队伍名称&#10;例如：&#10;湖人队&#10;勇士队&#10;凯尔特人队&#10;热火队&#10;公牛队&#10;马刺队"></textarea>
+                        <span class="form-hint">所有参赛队伍，每行一个队名</span>
+                        <span class="form-error" id="teamListError"></span>
+                    </div>
+                    
+                    <div class="info-card">
+                        🔒 <strong>种子队说明：</strong><br>
+                        种子队由创建者设定，参与者无法区分种子队与普通队。系统会自动确保种子队均衡分配到不同小组。
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="seedTeams">种子队伍（可多选）</label>
+                        <select id="seedTeams" class="form-control" multiple style="height: 100px;">
+                            <option value="" disabled selected>请先从上方输入队伍名称</option>
+                        </select>
+                        <span class="form-hint">按住 Ctrl/Command 键可多选种子队伍，或按住 Shift 键进行范围选择</span>
+                        <span class="form-error" id="seedTeamsError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="groupConfig">分组配置 *</label>
+                        <select id="groupConfig" class="form-control">
+                            <option value="">请选择分组配置</option>
+                            <option value="A:3,B:3">2组，每组3队（共6队）</option>
+                            <option value="A:4,B:4">2组，每组4队（共8队）</option>
+                            <option value="A:3,B:3,C:3">3组，每组3队（共9队）</option>
+                            <option value="A:3,B:3,C:2,D:2">4组，共10队</option>
+                            <option value="A:4,B:4,C:4">3组，每组4队（共12队）</option>
+                            <option value="A:4,B:4,C:4,D:4">4组，每组4队（共16队）</option>
+                            <option value="custom">自定义配置...</option>
+                        </select>
+                        <span class="form-hint">选择预设配置或自定义</span>
+                        <span class="form-error" id="groupConfigError"></span>
+                    </div>
+                    
+                    <!-- 自定义配置区域 -->
+                    <div id="customConfigSection" class="custom-config-section">
+                        <div class="form-group">
+                            <label for="customConfig">自定义分组配置 *</label>
+                            <input type="text" id="customConfig" class="form-control" placeholder="格式：A:3,B:3,C:3,D:3,E:3,F:3,G:3,H:3,I:3,J:3,K:2,L:2,M:2,N:2,O:2,P:2">
+                            <span class="form-hint">格式：组名:队伍数量,组名:队伍数量,...（如：A:3,B:3,C:3 表示3个小组，每组3队）</span>
+                            <div class="config-example">
+                                <strong>示例：</strong><br>
+                                42队，16组（10组3队，6组2队）：<br>
+                                A:3,B:3,C:3,D:3,E:3,F:3,G:3,H:3,I:3,J:3,K:2,L:2,M:2,N:2,O:2,P:2
+                            </div>
+                            <span class="form-error" id="customConfigError"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">管理密码 *</label>
+                        <input type="text" id="password" class="form-control" placeholder="设置管理密码">
+                        <span class="form-hint">请记住此密码，用于管理抽签</span>
+                        <span class="form-error" id="passwordError"></span>
+                    </div>
+                    
+                    <button class="btn" onclick="createDraw()" id="createBtn">创建抽签</button>
+                </div>
+                
+                <!-- 参与抽签页面 -->
+                <div class="tab-pane" id="joinTab">
+                    <div class="info-card">
+                        🎯 <strong>参与抽签：</strong><br>
+                        1. 输入抽签链接中的ID<br>
+                        2. 从列表中选择您的队伍<br>
+                        3. 立即查看分组结果
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="joinCode">抽签ID *</label>
+                        <input type="text" id="joinCode" class="form-control" placeholder="输入抽签链接中的ID（如：ABC123）">
+                        <span class="form-hint">可以从创建者分享的链接中获取</span>
+                        <span class="form-error" id="joinCodeError"></span>
+                    </div>
+                    
+                    <button class="btn" onclick="joinDraw()" id="joinBtn">参与抽签</button>
+                </div>
+                
+                <!-- 管理抽签页面 -->
+                <div class="tab-pane" id="manageTab">
+                    <div class="info-card">
+                        🔧 <strong>管理功能：</strong><br>
+                        1. 查看抽签详情<br>
+                        2. 重置抽签状态<br>
+                        3. 导出抽签数据
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="manageCode">抽签ID *</label>
+                        <input type="text" id="manageCode" class="form-control" placeholder="输入抽签ID">
+                        <span class="form-error" id="manageCodeError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="managePassword">管理密码 *</label>
+                        <input type="text" id="managePassword" class="form-control" placeholder="输入管理密码">
+                        <span class="form-error" id="managePasswordError"></span>
+                    </div>
+                    
+                    <button class="btn" onclick="manageDraw()" id="manageBtn">管理抽签</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 抽签结果页面 -->
+        <div id="drawPage" class="draw-page">
+            <div class="draw-header">
+                <h2 id="drawTitle">抽签名称</h2>
+                <div>抽签ID: <span class="draw-code" id="drawIdDisplay"></span></div>
+                <div>创建者: <strong id="drawCreator"></strong></div>
+                <div style="margin-top: 8px;">
+                    <span class="badge badge-primary" id="remainingTeams">0</span> 剩余队伍
+                    <span class="badge badge-success" id="totalCapacity">0</span> 总容量
+                </div>
+            </div>
+            
+            <div class="content">
+                <!-- 分配规则说明 -->
+                <div class="rules-info" id="rulesInfo">
+                    <h4>📋 抽签规则说明：</h4>
+                    <div id="rulesContent">
+                        参与者选择队伍后，系统将随机分配到有空位的小组，确保分组均衡。
+                    </div>
+                </div>
+                
+                <!-- 参与者信息输入 -->
+                <div id="participantForm">
+                    <div class="info-card">
+                        👤 <strong>填写信息参与抽签：</strong><br>
+                        请填写您的姓名并选择队伍名称，每个队伍只能被选择一次。
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="participantName">您的姓名 *</label>
+                        <input type="text" id="participantName" class="form-control" placeholder="请输入您的姓名">
+                        <span class="form-hint">用于标识您选择的队伍</span>
+                        <span class="form-error" id="participantNameError"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="availableTeams">选择队伍 *</label>
+                        <select id="availableTeams" class="form-control team-select">
+                            <option value="" disabled selected>请选择您的队伍...</option>
+                        </select>
+                        <span class="form-hint">每个队伍只能被选择一次</span>
+                        <span class="form-error" id="availableTeamsError"></span>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="participateDraw()" id="participateBtn">确认参与</button>
+                </div>
+                
+                <!-- 已参与提示 -->
+                <div id="alreadyParticipated" class="info-card" style="display: none;">
+                    <strong>✅ 您已参与抽签</strong><br>
+                    <div id="myTeamInfo"></div>
+                    <!-- 已删除"重新参与"按钮 -->
+                </div>
+                
+                <!-- 进度显示 -->
+                <div class="progress-container">
+                    <div class="progress-text">
+                        <span>报名进度</span>
+                        <span id="progressText">0/0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <!-- 分组结果 -->
+                <h3>分组结果</h3>
+                <div class="groups-container" id="groupsContainer">
+                    <!-- 分组将通过JS动态生成 -->
+                </div>
+                
+                <!-- 分享区域 -->
+                <div class="share-section">
+                    <h3>分享抽签</h3>
+                    <p>将此链接分享到微信群：</p>
+                    <div class="share-link">
+                        <span id="shareLink">加载中...</span>
+                    </div>
+                    <div class="share-buttons">
+                        <button class="share-btn copy" onclick="copyShareLink()">
+                            <span>📋</span> 复制链接
+                        </button>
+                        <button class="share-btn back" onclick="backToMain()">
+                            <span>←</span> 返回主页
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let draws = JSON.parse(localStorage.getItem('basketballDraws') || '{}');
+        let currentDraw = null;
+        let selectedTeam = null;
+        let currentParticipant = null;
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('抽签系统已初始化');
+            
+            // 设置标签页切换
+            setupTabs();
+            
+            // 监听队伍列表输入，更新种子队伍选择
+            document.getElementById('teamList').addEventListener('input', updateSeedTeamsSelect);
+            
+            // 监听分组配置选择
+            document.getElementById('groupConfig').addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    document.getElementById('customConfigSection').style.display = 'block';
+                } else {
+                    document.getElementById('customConfigSection').style.display = 'none';
+                }
+            });
+            
+            // 检查URL中是否有抽签ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const drawId = urlParams.get('id');
+            
+            if (drawId && draws[drawId]) {
+                currentDraw = draws[drawId];
+                showDrawPage();
+            }
+        });
+        
+        // 设置标签页切换
+        function setupTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabIndicator = document.getElementById('tabIndicator');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            // 设置初始指示器位置
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab) {
+                const tabWidth = 100 / tabBtns.length;
+                const tabIndex = Array.from(tabBtns).indexOf(activeTab);
+                tabIndicator.style.width = `${tabWidth}%`;
+                tabIndicator.style.left = `${tabIndex * tabWidth}%`;
+            }
+            
+            // 为每个标签按钮添加点击事件
+            tabBtns.forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    // 更新按钮状态
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新指示器位置
+                    const tabWidth = 100 / tabBtns.length;
+                    tabIndicator.style.width = `${tabWidth}%`;
+                    tabIndicator.style.left = `${index * tabWidth}%`;
+                    
+                    // 显示对应的标签页
+                    const tabId = this.getAttribute('data-tab');
+                    tabPanes.forEach(pane => {
+                        pane.classList.remove('active');
+                        if (pane.id === `${tabId}Tab`) {
+                            pane.classList.add('active');
+                        }
+                    });
+                    
+                    // 隐藏消息提示
+                    hideMessages();
+                });
+            });
+        }
+        
+        // 显示消息
+        function showMessage(type, text) {
+            // 移除现有消息
+            hideMessages();
+            
+            const messageContainer = document.getElementById('messageContainer');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.innerHTML = `
+                <span>${type === 'success' ? '✅' : '❌'}</span>
+                <span>${text}</span>
+            `;
+            
+            messageContainer.appendChild(message);
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // 隐藏所有消息
+        function hideMessages() {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msg => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (msg.parentNode) {
+                        msg.parentNode.removeChild(msg);
+                    }
+                }, 300);
+            });
+        }
+        
+        // 更新种子队伍选择列表
+        function updateSeedTeamsSelect() {
+            const teamList = document.getElementById('teamList').value;
+            const seedSelect = document.getElementById('seedTeams');
+            
+            // 清空当前选项
+            seedSelect.innerHTML = '';
+            
+            // 解析队伍名称
+            const teams = teamList.split('\n')
+                .map(t => t.trim())
+                .filter(t => t.length > 0);
+            
+            if (teams.length === 0) {
+                seedSelect.innerHTML = '<option value="" disabled selected>请先输入队伍名称</option>';
+                return;
+            }
+            
+            // 添加队伍选项
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                seedSelect.appendChild(option);
+            });
+        }
+        
+        // 解析分组配置
+        function parseGroupConfig(configStr) {
+            const config = {};
+            
+            if (!configStr || configStr.trim() === '') {
+                return config;
+            }
+            
+            const parts = configStr.split(',');
+            
+            for (const part of parts) {
+                if (part.includes(':')) {
+                    const [group, size] = part.split(':');
+                    const groupName = group.trim();
+                    const groupSize = parseInt(size.trim());
+                    
+                    if (groupName && !isNaN(groupSize) && groupSize > 0) {
+                        config[groupName] = groupSize;
+                    }
+                }
+            }
+            
+            return config;
+        }
+        
+        // 生成随机ID
+        function generateId() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ123456789';
+            let id = '';
+            for (let i = 0; i < 6; i++) {
+                id += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return id;
+        }
+        
+        // 创建抽签
+        function createDraw() {
+            // 获取表单数据
+            const drawName = document.getElementById('drawName').value.trim();
+            const creatorName = document.getElementById('creatorName').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const teamListText = document.getElementById('teamList').value.trim();
+            const groupConfigSelect = document.getElementById('groupConfig').value;
+            
+            // 获取分组配置字符串
+            let groupConfigStr = '';
+            if (groupConfigSelect === 'custom') {
+                groupConfigStr = document.getElementById('customConfig').value.trim();
+                if (!groupConfigStr) {
+                    showMessage('error', '请输入自定义分组配置');
+                    return;
+                }
+            } else {
+                groupConfigStr = groupConfigSelect;
+            }
+            
+            // 验证必填字段
+            if (!drawName) {
+                showMessage('error', '请输入抽签名称');
+                return;
+            }
+            
+            if (!creatorName) {
+                showMessage('error', '请输入创建者昵称');
+                return;
+            }
+            
+            if (!teamListText) {
+                showMessage('error', '请输入队伍名称');
+                return;
+            }
+            
+            if (!groupConfigStr) {
+                showMessage('error', '请选择分组配置');
+                return;
+            }
+            
+            if (!password) {
+                showMessage('error', '请输入管理密码');
+                return;
+            }
+            
+            // 解析所有队伍
+            const allTeams = teamListText.split('\n')
+                .map(t => t.trim())
+                .filter(t => t.length > 0);
+            
+            if (allTeams.length < 2) {
+                showMessage('error', '请输入至少2个队伍名称');
+                return;
+            }
+            
+            // 解析分组配置
+            const groupConfig = parseGroupConfig(groupConfigStr);
+            if (Object.keys(groupConfig).length === 0) {
+                showMessage('error', '请选择有效的分组配置');
+                return;
+            }
+            
+            // 获取种子队伍
+            const seedSelect = document.getElementById('seedTeams');
+            const selectedSeeds = Array.from(seedSelect.selectedOptions).map(opt => opt.value);
+            
+            // 验证种子队伍数量
+            const groupCount = Object.keys(groupConfig).length;
+            if (selectedSeeds.length > groupCount) {
+                showMessage('error', `种子队伍数(${selectedSeeds.length})不能超过分组数(${groupCount})`);
+                return;
+            }
+            
+            // 计算总容量
+            const totalCapacity = Object.values(groupConfig).reduce((sum, size) => sum + size, 0);
+            
+            if (allTeams.length > totalCapacity) {
+                showMessage('error', `队伍数量(${allTeams.length})超过总容量(${totalCapacity})，请增加分组或减少队伍`);
+                return;
+            }
+            
+            // 生成抽签ID
+            const drawId = generateId();
+            
+            // 创建抽签对象
+            const draw = {
+                id: drawId,
+                name: drawName,
+                creator: creatorName,
+                created: new Date().toLocaleString('zh-CN'),
+                groupConfig: groupConfig,
+                totalCapacity: totalCapacity,
+                allTeams: allTeams,
+                seedTeams: selectedSeeds,
+                password: password,
+                teams: [], // 已选择的队伍
+                groups: {},
+                joinCode: generateId().substring(0, 4), // 简化的加入代码
+                status: 'active',
+                groupSeedCount: {}, // 记录每个组的种子队数量
+                rules: '系统自动分配，确保分组均衡。参与者无法区分种子队与普通队。',
+                participants: {} // 记录参与者信息
+            };
+            
+            // 初始化分组结构
+            for (const [groupName, capacity] of Object.entries(groupConfig)) {
+                draw.groups[groupName] = {
+                    name: groupName,
+                    capacity: capacity,
+                    teams: [],
+                    seatsLeft: capacity,
+                    seedCount: 0 // 该组的种子队数量
+                };
+                
+                // 初始化组种子队计数
+                draw.groupSeedCount[groupName] = 0;
+            }
+            
+            // 保存抽签
+            draws[drawId] = draw;
+            localStorage.setItem('basketballDraws', JSON.stringify(draws));
+            
+            // 显示成功消息
+            showMessage('success', '抽签创建成功！正在跳转到抽签页面...');
+            
+            // 跳转到抽签页面
+            setTimeout(() => {
+                currentDraw = draw;
+                showDrawPage();
+            }, 1000);
+        }
+        
+        // 显示抽签页面
+        function showDrawPage() {
+            // 隐藏主页面
+            document.getElementById('mainPage').style.display = 'none';
+            
+            // 显示抽签页面
+            document.getElementById('drawPage').style.display = 'block';
+            
+            // 设置抽签信息
+            document.getElementById('drawTitle').textContent = currentDraw.name;
+            document.getElementById('drawIdDisplay').textContent = currentDraw.id;
+            document.getElementById('drawCreator').textContent = currentDraw.creator;
+            document.getElementById('totalCapacity').textContent = currentDraw.totalCapacity;
+            
+            // 更新规则说明
+            updateRulesDisplay();
+            
+            // 更新分享链接
+            const shareLink = `${window.location.origin}${window.location.pathname}?id=${currentDraw.id}`;
+            document.getElementById('shareLink').textContent = shareLink;
+            
+            // 更新页面内容
+            updateDrawPage();
+        }
+        
+        // 更新规则说明
+        function updateRulesDisplay() {
+            const rulesContent = document.getElementById('rulesContent');
+            
+            rulesContent.innerHTML = `
+                <strong>抽签规则：</strong><br>
+                参与者选择队伍后，系统将随机分配到有空位的小组，确保分组均衡。
+                <br><br>
+                <strong>分组情况：</strong><br>
+                共${Object.keys(currentDraw.groupConfig).length}个小组，总容量${currentDraw.totalCapacity}队。
+                ${currentDraw.seedTeams.length > 0 ? `系统已设置${currentDraw.seedTeams.length}支种子队，将自动均衡分配到不同小组。` : ''}
+            `;
+        }
+        
+        // 更新抽签页面
+        function updateDrawPage() {
+            // 更新可用队伍选择
+            updateAvailableTeams();
+            
+            // 更新分组显示
+            updateGroupsDisplay();
+            
+            // 更新进度
+            updateProgress();
+            
+            // 检查当前用户是否已参与
+            checkCurrentParticipant();
+            
+            // 更新剩余队伍数
+            const remaining = currentDraw.allTeams.length - currentDraw.teams.length;
+            document.getElementById('remainingTeams').textContent = remaining;
+        }
+        
+        // 更新可用队伍选择
+        function updateAvailableTeams() {
+            const selectElement = document.getElementById('availableTeams');
+            
+            // 清空当前选项
+            selectElement.innerHTML = '<option value="" disabled selected>请选择您的队伍...</option>';
+            
+            // 获取已选择的队伍
+            const selectedTeams = new Set(currentDraw.teams.map(t => t.name));
+            
+            // 添加未选择的队伍选项
+            currentDraw.allTeams.forEach(team => {
+                if (!selectedTeams.has(team)) {
+                    const option = document.createElement('option');
+                    option.value = team;
+                    option.textContent = team;
+                    selectElement.appendChild(option);
+                }
+            });
+        }
+        
+        // 检查当前参与者是否已参与
+        function checkCurrentParticipant() {
+            // 检查localStorage中是否有当前抽签的参与者信息
+            const participantKey = `participant_${currentDraw.id}`;
+            const participantInfo = JSON.parse(localStorage.getItem(participantKey));
+            
+            if (participantInfo) {
+                // 验证该参与者信息是否有效（队伍是否还存在）
+                const teamExists = currentDraw.teams.some(team => 
+                    team.name === participantInfo.team && 
+                    team.selectedByName === participantInfo.name
+                );
+                
+                if (teamExists) {
+                    // 显示已参与信息
+                    currentParticipant = participantInfo;
+                    document.getElementById('participantForm').style.display = 'none';
+                    document.getElementById('alreadyParticipated').style.display = 'block';
+                    
+                    // 查找参与者的队伍信息
+                    let teamInfo = null;
+                    for (const [groupName, groupInfo] of Object.entries(currentDraw.groups)) {
+                        for (const team of groupInfo.teams) {
+                            if (team.name === participantInfo.team && team.selectedByName === participantInfo.name) {
+                                teamInfo = team;
+                                break;
+                            }
+                        }
+                        if (teamInfo) break;
+                    }
+                    
+                    if (teamInfo) {
+                        document.getElementById('myTeamInfo').innerHTML = `
+                            参与者：<strong>${teamInfo.selectedByName}</strong><br>
+                            您的队伍：<strong>${teamInfo.name}</strong><br>
+                            所在小组：<strong>${teamInfo.group}组</strong>
+                        `;
+                    }
+                } else {
+                    // 参与者信息无效，清除
+                    localStorage.removeItem(participantKey);
+                    currentParticipant = null;
+                    document.getElementById('participantForm').style.display = 'block';
+                    document.getElementById('alreadyParticipated').style.display = 'none';
+                }
+            } else {
+                currentParticipant = null;
+                document.getElementById('participantForm').style.display = 'block';
+                document.getElementById('alreadyParticipated').style.display = 'none';
+            }
+        }
+        
+        // 参与抽签
+        function participateDraw() {
+            const participantName = document.getElementById('participantName').value.trim();
+            const teamName = document.getElementById('availableTeams').value;
+            
+            // 验证输入
+            if (!participantName) {
+                showMessage('error', '请输入您的姓名');
+                return;
+            }
+            
+            if (!teamName) {
+                showMessage('error', '请选择队伍');
+                return;
+            }
+            
+            // 检查队伍是否已被选择
+            for (const [groupName, groupInfo] of Object.entries(currentDraw.groups)) {
+                for (const team of groupInfo.teams) {
+                    if (team.name === teamName) {
+                        showMessage('error', '该队伍已被选择，请选择其他队伍');
+                        return;
+                    }
+                }
+            }
+            
+            // 检查是否为种子队伍
+            const isSeed = currentDraw.seedTeams.includes(teamName);
+            
+            // 找到有空位的小组
+            const availableGroups = [];
+            for (const [groupName, groupInfo] of Object.entries(currentDraw.groups)) {
+                if (groupInfo.seatsLeft > 0) {
+                    availableGroups.push({
+                        name: groupName,
+                        seedCount: groupInfo.seedCount,
+                        seatsLeft: groupInfo.seatsLeft
+                    });
+                }
+            }
+            
+            if (availableGroups.length === 0) {
+                showMessage('error', '所有小组已满，无法分配');
+                return;
+            }
+            
+            let assignedGroup = null;
+            
+            if (isSeed) {
+                // 种子队分配逻辑：优先分配到种子队最少的小组
+                // 先找出种子队数量最少的小组
+                const minSeedCount = Math.min(...availableGroups.map(g => g.seedCount));
+                const groupsWithMinSeed = availableGroups.filter(g => g.seedCount === minSeedCount);
+                
+                // 如果有多个小组种子队数量相同，随机选择一个
+                assignedGroup = groupsWithMinSeed[Math.floor(Math.random() * groupsWithMinSeed.length)].name;
+            } else {
+                // 非种子队：随机分配到有空位的小组
+                // 但也要考虑均衡性，优先分配到种子队较多的小组（因为种子队较少的小组可能已被种子队占据）
+                // 这样可以确保种子队和非种子队都均衡分布
+                
+                // 计算每个组的权重：种子队越多，权重越低（优先分配给种子队少的小组）
+                const weightedGroups = [];
+                availableGroups.forEach(group => {
+                    // 种子队数量越少，权重越高（更容易被选中）
+                    const weight = 1 / (group.seedCount + 1);
+                    weightedGroups.push({ name: group.name, weight });
+                });
+                
+                // 根据权重随机选择
+                const totalWeight = weightedGroups.reduce((sum, g) => sum + g.weight, 0);
+                let random = Math.random() * totalWeight;
+                
+                for (const group of weightedGroups) {
+                    random -= group.weight;
+                    if (random <= 0) {
+                        assignedGroup = group.name;
+                        break;
+                    }
+                }
+                
+                // 如果上面的算法没选出来，随机选一个
+                if (!assignedGroup) {
+                    assignedGroup = availableGroups[Math.floor(Math.random() * availableGroups.length)].name;
+                }
+            }
+            
+            // 添加队伍到小组
+            const teamInfo = {
+                name: teamName,
+                isSeed: isSeed,
+                group: assignedGroup,
+                selectedAt: new Date().toLocaleString('zh-CN'),
+                selectedByName: participantName,
+                participantId: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+            };
+            
+            currentDraw.groups[assignedGroup].teams.push(teamInfo);
+            currentDraw.groups[assignedGroup].seatsLeft--;
+            
+            // 如果是种子队，更新该组的种子队计数
+            if (isSeed) {
+                currentDraw.groups[assignedGroup].seedCount++;
+                currentDraw.groupSeedCount[assignedGroup]++;
+            }
+            
+            // 添加到已选择队伍列表
+            currentDraw.teams.push(teamInfo);
+            
+            // 记录参与者信息
+            currentParticipant = {
+                name: participantName,
+                team: teamName,
+                group: assignedGroup,
+                participantId: teamInfo.participantId,
+                participatedAt: new Date().toISOString()
+            };
+            
+            // 保存到localStorage
+            const participantKey = `participant_${currentDraw.id}`;
+            localStorage.setItem(participantKey, JSON.stringify(currentParticipant));
+            
+            // 保存更新
+            draws[currentDraw.id] = currentDraw;
+            localStorage.setItem('basketballDraws', JSON.stringify(draws));
+            
+            // 显示成功消息
+            showMessage('success', `${participantName} 已成功选择 ${teamName}！分配到 ${assignedGroup}组`);
+            
+            // 更新页面
+            updateDrawPage();
+            
+            // 清空表单
+            document.getElementById('participantName').value = '';
+            document.getElementById('availableTeams').value = '';
+        }
+        
+        // 更新分组显示
+        function updateGroupsDisplay() {
+            const container = document.getElementById('groupsContainer');
+            container.innerHTML = '';
+            
+            for (const [groupName, groupInfo] of Object.entries(currentDraw.groups)) {
+                const groupCard = document.createElement('div');
+                groupCard.className = 'group-card';
+                
+                let teamsHTML = '';
+                
+                // 显示所有队伍（参与者看不到种子队标识）
+                if (groupInfo.teams.length > 0) {
+                    groupInfo.teams.forEach(team => {
+                        teamsHTML += `
+                            <div class="team-item">
+                                <span>${team.name}</span>
+                                <span class="team-number">${team.selectedByName}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    teamsHTML = '<div style="color: #999; text-align: center; padding: 20px;">暂无队伍</div>';
+                }
+                
+                // 空位
+                if (groupInfo.seatsLeft > 0) {
+                    teamsHTML += `
+                        <div style="margin-top: 15px; color: #666;">
+                            <strong>剩余空位：${groupInfo.seatsLeft}个</strong>
+                        </div>
+                    `;
+                }
+                
+                groupCard.innerHTML = `
+                    <div class="group-header">${groupName}组 (${groupInfo.teams.length}/${groupInfo.capacity})</div>
+                    <div class="group-body">
+                        ${teamsHTML}
+                    </div>
+                `;
+                
+                container.appendChild(groupCard);
+            }
+        }
+        
+        // 更新进度
+        function updateProgress() {
+            const selectedCount = currentDraw.teams.length;
+            const totalCount = currentDraw.totalCapacity;
+            const percent = Math.round((selectedCount / totalCount) * 100);
+            
+            document.getElementById('progressText').textContent = `${selectedCount}/${totalCount}`;
+            document.getElementById('progressFill').style.width = `${percent}%`;
+        }
+        
+        // 复制分享链接
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink').textContent;
+            
+            // 使用现代复制API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(shareLink).then(() => {
+                    showMessage('success', '链接已复制到剪贴板！');
+                }).catch(err => {
+                    fallbackCopyText(shareLink);
+                });
+            } else {
+                fallbackCopyText(shareLink);
+            }
+        }
+        
+        // 备用复制方法
+        function fallbackCopyText(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showMessage('success', '链接已复制到剪贴板！');
+                } else {
+                    showMessage('error', '复制失败，请手动复制链接');
+                }
+            } catch (err) {
+                showMessage('error', '复制失败，请手动复制链接');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        // 返回主页
+        function backToMain() {
+            document.getElementById('drawPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'block';
+            
+            // 清空表单
+            const formFields = ['drawName', 'creatorName', 'teamList', 'password', 'joinCode', 'manageCode', 'managePassword', 'customConfig'];
+            formFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.value = '';
+            });
+            
+            // 重置种子选择
+            document.getElementById('seedTeams').innerHTML = '<option value="" disabled selected>请先从上方输入队伍名称</option>';
+            
+            // 重置分组配置
+            document.getElementById('groupConfig').value = '';
+            document.getElementById('customConfigSection').style.display = 'none';
+            
+            // 隐藏消息提示
+            hideMessages();
+            
+            // 重置当前参与者和抽签
+            currentParticipant = null;
+            currentDraw = null;
+        }
+        
+        // 参与抽签（进入抽签页面）
+        function joinDraw() {
+            const joinCode = document.getElementById('joinCode').value.trim().toUpperCase();
+            
+            if (!joinCode) {
+                showMessage('error', '请输入抽签链接或ID');
+                return;
+            }
+            
+            // 查找抽签
+            let foundDraw = null;
+            
+            // 先尝试直接匹配ID
+            if (draws[joinCode]) {
+                foundDraw = draws[joinCode];
+            } else {
+                // 尝试匹配加入代码
+                for (const drawId in draws) {
+                    if (draws[drawId].joinCode === joinCode) {
+                        foundDraw = draws[drawId];
+                        break;
+                    }
+                }
+            }
+            
+            if (!foundDraw) {
+                showMessage('error', '未找到对应的抽签，请检查ID是否正确');
+                return;
+            }
+            
+            // 设置当前抽签
+            currentDraw = foundDraw;
+            
+            // 显示抽签页面
+            showDrawPage();
+        }
+        
+        // 管理抽签
+        function manageDraw() {
+            const manageCode = document.getElementById('manageCode').value.trim();
+            const managePassword = document.getElementById('managePassword').value.trim();
+            
+            if (!manageCode || !managePassword) {
+                showMessage('error', '请输入抽签ID和管理密码');
+                return;
+            }
+            
+            if (!draws[manageCode]) {
+                showMessage('error', '抽签ID不存在');
+                return;
+            }
+            
+            if (draws[manageCode].password !== managePassword) {
+                showMessage('error', '管理密码错误');
+                return;
+            }
+            
+            currentDraw = draws[manageCode];
+            
+            // 显示抽签页面
+            showDrawPage();
+            
+            // 显示管理功能
+            showMessage('success', '管理权限验证成功！');
+        }
+    </script>
+</body>
+</html>
